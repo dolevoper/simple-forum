@@ -5,7 +5,9 @@ import { json } from "body-parser";
 import { User } from "./user.model";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+import { Post } from "./post.model";
 
+const sessionCookieName = "userId";
 const app = express();
 
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -31,7 +33,7 @@ app.post("/api/auth/register", async (req, res, next) => {
         const expires = new Date();
         expires.setDate(now.getDate() + 1);
 
-        res.cookie("userId", user._id, {
+        res.cookie(sessionCookieName, user._id, {
             httpOnly: true,
             secure: true,
             signed: true,
@@ -40,6 +42,18 @@ app.post("/api/auth/register", async (req, res, next) => {
 
         res.status(201);
         res.end();
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
+
+app.get("/api/currentUser", async (req, res, next) => {
+    try {
+        const user = await getUser(req.signedCookies[sessionCookieName]);
+
+        res.status(200);
+        res.json(user);
     } catch (error) {
         console.error(error);
         next(error);
@@ -55,6 +69,36 @@ app.get("/api/posts", (req, res) => {
     posts.sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf());
 
     res.send(posts);
+});
+
+app.post("/api/posts", async (req, res, next) => {
+    try {
+        const user = await getUser(req.signedCookies[sessionCookieName]);
+
+        if (!user) {
+            throw new Error();
+        }
+
+        const { subject, content } = req.body;
+
+        if (!subject || !content) {
+            res.status(400);
+            res.send("Must provide subject and content");
+            return;
+        }
+
+        await Post.create({
+            user,
+            subject,
+            content
+        });
+
+        res.status(201);
+        res.end();
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
 });
 
 app.use(express.static("public"));
@@ -75,3 +119,17 @@ async function startServer() {
 }
 
 startServer();
+
+async function getUser(userId?: string) {
+    if (!userId) {
+        return null;
+    }
+
+    const user = await User.findById(userId, { username: true });
+
+    if (!user) {
+        throw new Error();
+    }
+
+    return user;
+}

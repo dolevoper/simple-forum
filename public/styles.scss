@@ -19,7 +19,8 @@ body {
 }
 
 input,
-button {
+button,
+textarea {
     font-size: inherit;
     font-family: inherit;
     line-height: inherit;
@@ -76,5 +77,13 @@ label {
         span {
             margin-left: auto;
         }
+    }
+}
+
+form[name=create-post] {
+    display: none;
+
+    .logged-in & {
+        display: revert;
     }
 }

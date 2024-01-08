@@ -10,10 +10,22 @@
 
 <body>
     <header>
-
+        <p id="username"></p>
     </header>
     <main class="flow">
         <h1>Forum</h1>
+        <form name="create-post" class="flow">
+            <h2>Create post</h2>
+            <div class="form-control">
+                <label for="subject">Subject</label>
+                <input id="subject" name="subject" type="text" required />
+            </div>
+            <div class="form-control">
+                <label for="content">Content</label>
+                <textarea name="content" id="content" rows="10" required></textarea>
+            </div>
+            <button>Post</button>
+        </form>
         <ul id="posts"></ul>
     </main>
 
