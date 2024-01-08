@@ -60,15 +60,16 @@ app.get("/api/currentUser", async (req, res, next) => {
     }
 });
 
-app.get("/api/posts", (req, res) => {
-    const posts = [
-        { _id: "aaaaa", createdAt: new Date(2024, 0, 7), user: { username: "omer" }, subject: "First post!" },
-        { _id: "bbbbb", createdAt: new Date(2024, 0, 8), user: { username: "dolevoper" }, subject: "Node.js module is almost over" }
-    ];
+app.get("/api/posts", async (req, res, next) => {
+    try {
+        const posts = await Post.find({}, undefined, { sort: { createdAt: "desc" } }).populate("user");
 
-    posts.sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf());
-
-    res.send(posts);
+        res.status(200);
+        res.send(posts);
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
 });
 
 app.post("/api/posts", async (req, res, next) => {
@@ -125,7 +126,7 @@ async function getUser(userId?: string) {
         return null;
     }
 
-    const user = await User.findById(userId, { username: true });
+    const user = await User.findById(userId);
 
     if (!user) {
         throw new Error();

@@ -13,7 +13,8 @@ const schema = new Schema<User>({
     password: {
         type: String,
         required: true,
-        set: hashPassword
+        set: hashPassword,
+        select: false
     }
 });
 
