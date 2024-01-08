@@ -46,6 +46,17 @@ app.post("/api/auth/register", async (req, res, next) => {
     }
 });
 
+app.get("/api/posts", (req, res) => {
+    const posts = [
+        { _id: "aaaaa", createdAt: new Date(2024, 0, 7), user: { username: "omer" }, subject: "First post!" },
+        { _id: "bbbbb", createdAt: new Date(2024, 0, 8), user: { username: "dolevoper" }, subject: "Node.js module is almost over" }
+    ];
+
+    posts.sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf());
+
+    res.send(posts);
+});
+
 app.use(express.static("public"));
 
 const server = createServer(app);
